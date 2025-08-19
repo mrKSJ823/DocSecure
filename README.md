@@ -1,2 +1,2 @@
 # DocSecure
-# wassup
+# Welcome collegues to our project
