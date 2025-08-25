@@ -3,10 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>DocSecure - PDF Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .upload-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .file-input {
+            margin: 20px 0;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        input[type="file"]:hover {
+            border-color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            display: none;
+        }
+        .error {
+            color: #dc3545;
+            margin-top: 10px;
+        }
+        .success {
+            color: #28a745;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-   <p> THis is html</p> 
+    <div class="upload-container">
+        <h1>DocSecure - PDF Upload</h1>
+        <form id="uploadForm" enctype="multipart/form-data" action="/upload" method="POST">
+            <div class="file-input"> 
+                <input type="file" id="fileInput" name="file" accept=".pdf" required>
+            </div>
+            <div id="fileInfo" class="file-info"></div>
+            <div id="errorMessage" class="error"></div>
+            <div id="successMessage" class="success"></div>
+            <button type="submit" id="uploadBtn">Upload PDF</button>
+        </form>
+    </div>
 
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const form = document.getElementById('uploadForm');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            errorMessage.textContent = '';
+            successMessage.textContent = '';
+            
+            if (file) {
+                // Check file type
+                if (file.type !== 'application/pdf') {
+                    errorMessage.textContent = 'Only PDF files are allowed.';
+                    uploadBtn.disabled = true;
+                    fileInfo.style.display = 'none';
+                    return;
+                }
+
+                // Check file size (5MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    errorMessage.textContent = 'File size exceeds 5MB limit.';
+                    uploadBtn.disabled = true;
+                    fileInfo.style.display = 'none';
+                    return;
+                }
+
+                // Show file info
+                fileInfo.innerHTML = `
+                    <strong>Selected File:</strong> ${file.name}<br>
+                    <strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB
+                `;
+                fileInfo.style.display = 'block';
+                uploadBtn.disabled = false;
+            } else {
+                fileInfo.style.display = 'none';
+                uploadBtn.disabled = true;
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                errorMessage.textContent = 'Please select a PDF file.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    successMessage.textContent = 'File uploaded successfully!';
+                    errorMessage.textContent = '';
+                    form.reset();
+                    fileInfo.style.display = 'none';
+                } else {
+                    const errorText = await response.text();
+                    errorMessage.textContent = errorText;
+                    successMessage.textContent = '';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Upload failed. Please try again.';
+                successMessage.textContent = '';
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload PDF';
+            }
+        });
+    </script>
 </body>
 </html>

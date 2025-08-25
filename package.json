@@ -1,0 +1,29 @@
+{
+  "name": "docsecure",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrKSJ823/DocSecure.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mrKSJ823/DocSecure/issues"
+  },
+  "homepage": "https://github.com/mrKSJ823/DocSecure#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-fileupload": "^1.5.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
